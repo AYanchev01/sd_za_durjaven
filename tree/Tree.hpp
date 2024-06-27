@@ -24,11 +24,12 @@ public:
     ~Tree();
 
 private:
-    void copyFrom(Node* &thisNode, Node* otherNode);
+    void copyFrom(Node*& thisNode, Node* otherNode);
     void free(Node* node);
 
 public:
     void addChild(Node* parent, const T& childData);
+    void addChildToNode(const T& parentData, const T& childData);
     Node* find(Node* node, const T& data) const;
     void print(Node* node) const;
     void printTree() const;
@@ -65,7 +66,7 @@ Tree<T>::~Tree()
 }
 
 template <typename T>
-void Tree<T>::copyFrom(Node* &thisNode, Node* otherNode)
+void Tree<T>::copyFrom(Node*& thisNode, Node* otherNode)
 {
     if (otherNode == nullptr)
         return;
@@ -99,6 +100,20 @@ void Tree<T>::addChild(Node* parent, const T& childData)
     {
         Node* childNode = new Node(childData);
         parent->children.push_back(childNode);
+    }
+}
+
+template <typename T>
+void Tree<T>::addChildToNode(const T& parentData, const T& childData)
+{
+    Node* parentNode = find(root, parentData);
+    if (parentNode != nullptr)
+    {
+        addChild(parentNode, childData);
+    }
+    else
+    {
+        throw std::invalid_argument("Parent node not found");
     }
 }
 
@@ -139,4 +154,19 @@ template <typename T>
 typename Tree<T>::Node* Tree<T>::getRoot() const
 {
     return root;
+}
+
+// Example usage
+int main()
+{
+    Tree<int> tree(1); // Create a tree with root value 1
+    tree.addChild(tree.getRoot(), 2); // Add child with value 2 to the root
+    tree.addChild(tree.getRoot(), 3); // Add child with value 3 to the root
+
+    tree.addChildToNode(2, 4); // Add child with value 4 to the node with value 2
+    tree.addChildToNode(2, 5); // Add child with value 5 to the node with value 2
+
+    tree.printTree(); // Should print: 1 2 4 5 3
+
+    return 0;
 }
