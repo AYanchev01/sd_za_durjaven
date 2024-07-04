@@ -6,112 +6,88 @@ template <typename T>
 class DynamicQueue {
 private:
     T* data;
-    int head;
-    int tail;
+    int headIndex;
+    int tailIndex;
     int capacity;
-    int count;
-
-    void resize();
-    void copy(const DynamicQueue<T>& other);
-    void free();
+    int currSize;
 
 public:
-    DynamicQueue();
-    DynamicQueue(const DynamicQueue<T>& other);
-    DynamicQueue& operator=(const DynamicQueue<T>& other);
-    ~DynamicQueue();
+    DynamicQueue() : headIndex(0), tailIndex(0), capacity(INITIAL_CAPACITY), currSize(0) {
+        data = new T[capacity];
+    }
 
-    bool empty() const;
-    void enqueue(const T& elem);
-    T dequeue();
-    T front() const;
-};
-
-template <typename T>
-DynamicQueue<T>::DynamicQueue() : head(0), tail(0), capacity(INITIAL_CAPACITY), count(0) {
-    data = new T[capacity];
-}
-
-template <typename T>
-DynamicQueue<T>::DynamicQueue(const DynamicQueue<T>& other) {
-    copy(other);
-}
-
-template <typename T>
-DynamicQueue<T>& DynamicQueue<T>::operator=(const DynamicQueue<T>& other) {
-    if (this != &other) {
-        free();
+    DynamicQueue(const DynamicQueue<T>& other) {
         copy(other);
     }
-    return *this;
-}
 
-template <typename T>
-DynamicQueue<T>::~DynamicQueue() {
-    free();
-}
-
-template <typename T>
-void DynamicQueue<T>::resize() {
-    T* oldElements = data;
-    data = new T[2 * capacity];
-    for (unsigned i = 0; i < count; i++) {
-        data[i] = oldElements[(head + i) % capacity];
+    DynamicQueue& operator=(const DynamicQueue<T>& other) {
+        if (this != &other) {
+            free();
+            copy(other);
+        }
+        return *this;
     }
-    capacity *= 2;
-    delete[] oldElements;
-    head = 0;
-    tail = count;
-}
 
-template <typename T>
-bool DynamicQueue<T>::empty() const {
-    return count == 0;
-}
-
-template <typename T>
-void DynamicQueue<T>::enqueue(const T& elem) {
-    if (count == capacity) {
-        resize();
+    ~DynamicQueue() {
+        free();
     }
-    data[tail] = elem;
-    tail = (tail + 1) % capacity;
-    ++count;
-}
 
-template <typename T>
-T DynamicQueue<T>::dequeue() {
-    if (empty()) {
-        throw std::runtime_error("You cannot dequeue from an empty queue!");
+    bool empty() const {
+        return currSize == 0;
     }
-    T value = data[head];
-    head = (head + 1) % capacity;
-    --count;
-    return value;
-}
 
-template <typename T>
-T DynamicQueue<T>::front() const {
-    if (empty()) {
-        throw std::runtime_error("You cannot get the front element of an empty queue!");
+    void enqueue(const T& elem) {
+        if (currSize == capacity) {
+            resize();
+        }
+        data[tailIndex] = elem;
+        tailIndex = (tailIndex + 1) % capacity;
+        ++currSize;
     }
-    return data[head];
-}
 
-template <typename T>
-void DynamicQueue<T>::copy(const DynamicQueue<T>& other) {
-    head = other.head;
-    tail = other.tail;
-    capacity = other.capacity;
-    count = other.count;
-
-    data = new T[capacity];
-    for (unsigned i = 0; i < capacity; i++) {
-        data[i] = other.data[i];
+    T dequeue() {
+        if (empty()) {
+            throw std::runtime_error("You cannot dequeue from an empty queue!");
+        }
+        T value = data[headIndex];
+        headIndex = (headIndex + 1) % capacity;
+        --currSize;
+        return value;
     }
-}
 
-template <typename T>
-void DynamicQueue<T>::free() {
-    delete[] data;
-}
+    T front() const {
+        if (empty()) {
+            throw std::runtime_error("You cannot get the front element of an empty queue!");
+        }
+        return data[headIndex];
+    }
+
+private:
+    void resize() {
+        T* oldElements = data;
+        data = new T[2 * capacity];
+        for (unsigned i = 0; i < currSize; i++) {
+            data[i] = oldElements[(headIndex + i) % capacity];
+        }
+        capacity *= 2;
+        delete[] oldElements;
+        headIndex = 0;
+        tailIndex = currSize;
+    }
+
+    void copy(const DynamicQueue<T>& other) {
+        headIndex = other.headIndex;
+        tailIndex = other.tailIndex;
+        capacity = other.capacity;
+        currSize = other.currSize;
+
+        data = new T[capacity];
+        for (unsigned i = 0; i < capacity; i++) {
+            data[i] = other.data[i];
+        }
+    }
+
+    void free() {
+        delete[] data;
+    }
+};

@@ -3,60 +3,43 @@ const int MAX_SIZE = 1024;
 template <typename T>
 class StaticQueue {
 private:
-	T data[MAX_SIZE];
-	unsigned head, tail, size;  // Индекси и текущ брой на елементите
+    T data[MAX_SIZE];
+    unsigned headIndex, tailIndex, currSize; // Indices and current number of elements
 
 public:
-	StaticQueue();              // Създаване на празна опашка
+    StaticQueue() : headIndex(0), tailIndex(0), currSize(0) {} // Create an empty queue
 
-	bool full() const;
-	bool empty() const;         // Проверка дали опашка е празна
-	void push(const T& elem);   // Включване на елемент
-	void pop();                 // Изключване на елемент
-	T head() const;             // Достъп до първия елемент в опашка
+    bool full() const { // Check if queue is full
+        return currSize == MAX_SIZE;
+    }
+
+    bool empty() const { // Check if queue is empty
+        return currSize == 0;
+    }
+
+    void push(const T& elem) { // Enqueue an element
+        if (full()) {
+            throw std::runtime_error("The queue is full!");
+        }
+        data[tailIndex] = elem;
+        currSize++;
+        tailIndex++;
+        tailIndex = tailIndex % MAX_SIZE;
+    }
+
+    void pop() { // Dequeue an element
+        if (empty()) {
+            throw std::runtime_error("Cannot delete element from an empty queue");
+        }
+        currSize--;
+        headIndex++;
+        headIndex = headIndex % MAX_SIZE;
+    }
+
+    T head() const { // Access the front element
+        if (empty()) {
+            throw std::runtime_error("Cannot get element from an empty queue");
+        }
+        return data[headIndex];
+    }
 };
-
-// Задава индексите на първата празна позиция
-template <typename T>
-StaticQueue<T>::StaticQueue() : head(0), tail(0), size(0)
-{}
-
-template <typename T>
-bool StaticQueue<T>::full() const {
-	return size == MAX_SIZE;
-}
-
-template <typename T>
-bool StaticQueue<T>::empty() const {
-	return size == 0;
-}
-
-template <typename T>
-T StaticQueue<T>::head() const {
-	if (empty()) {
-		throw std::runtime_error("Can not get elem from an empty queue");
-	}
-	return data[head];
-}
-
-template <typename T>
-void StaticQueue<T>::push(const T& elem) {
-	if (full()) {
-		throw std::runtime_error("The queue is full!");
-	}
-
-	data[tail] = elem;
-	size++;
-	tail++;
-	tail = tail % MAX_SIZE;
-}
-
-template <typename T>
-void StaticQueue<T>::pop() {
-	if (empty()) {
-		throw std::runtime_error("Can not delete element from an empty queue");
-	}
-	size--;
-	head++;
-	head = head % MAX_SIZE;
-}
