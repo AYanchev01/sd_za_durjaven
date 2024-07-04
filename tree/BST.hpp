@@ -17,58 +17,32 @@ private:
         {}
     } *root;
 
-    size_t size;
-
 public:
-    BST() : root(nullptr), size(0) {};
-    ~BST() { clear(root); }
+    BST() : root(nullptr) {};
 
-    BST(const BST& tree) : root(copy(tree.root)), size(tree.size) {};
-
-    BST(BST&& tree) : BST()
-    {
-        std::swap(root, tree.root);
-        std::swap(size, tree.size);
-    };
+    BST(const BST& tree) : root(copy(tree.root)) {};
 
     BST& operator=(const BST& tree)
     {
         if (&tree != this) {
-            clear(root);
+            free(root);
             root = copy(tree.root);
-            size = tree.size;
         }
         return *this;
     }
 
-    BST& operator=(BST&& rhs)
-    {
-        if (this != &rhs) {
-            std::swap(root, rhs.root);
-            std::swap(size, rhs.size);
-        }
-        return *this;
-    }
+    ~BST() { free(root); }
 
     bool find(const T& key) const { return find(root, key); }
-    void insert(const T& key) { insert(root, key); ++size; }
+    void insert(const T& key) { insert(root, key); }
     void remove(const T& key) { remove(root, key); }
-
-    size_t getSize() const { return size; }
-
-    size_t getHeight() const { return (size_t)height(root); }
-    bool isBalanced() const { return balanced(root); }
-    bool isPerfectlyBalanced() const { return perfectBalanced(root); }
-
-    void printInorder() const { print(root); std::cout << "\n"; }
-
 private:
 
-    void clear(Node* root)
+    void free(Node* root)
     {
         if (root) {
-            clear(root->left);
-            clear(root->right);
+            free(root->left);
+            free(root->right);
             delete root;
         }
     }
@@ -76,8 +50,7 @@ private:
     Node* copy(Node* root)
     {
         return root ?
-            new Node(root->key, copy(root->left), copy(root->right)) :
-            root;
+            new Node(root->key, copy(root->left), copy(root->right)) : nullptr;
     }
 
     bool find(const Node* root, const T& key) const
@@ -115,7 +88,6 @@ private:
                 mR->right = root->right;
                 root = mR;
             }
-            --size;
             delete toDel;
         }
         else {
@@ -132,41 +104,5 @@ private:
         Node* n = root;
         root = root->right;
         return n;
-    }
-
-    int height(const Node* root) const
-    {
-        if (!root) return 0;
-        return 1 + std::max(height(root->left), height(root->right));
-    }
-
-    bool balanced(const Node* root) const
-    {
-        if (!root) return true;
-        return abs(height(root->left) - height(root->right)) < 2 &&
-               balanced(root->left) && balanced(root->right);
-    }
-
-
-    bool perfectBalanced(const Node* root) const
-    {
-        if (!root) return true;
-        return labs(weight(root->left) - weight(root->right)) < 2 &&
-               perfectBalanced(root->left) && perfectBalanced(root->right);
-    }
-
-    long weight(const Node* root) const
-    {
-        if (!root) return 0;
-        return 1 + weight(root->left) + weight(root->right);
-    }
-
-    void print(const Node* root) const
-    {
-        if (root) {
-            print(root->left);
-            std::cout << root->key << " ";
-            print(root->right);
-        }
     }
 };
