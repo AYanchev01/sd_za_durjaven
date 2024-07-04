@@ -16,32 +16,51 @@ private:
 
 public:
 	List();
-
 	List(const List<T>& other);
-	List(List<T>&& other);
-
 	List<T>& operator=(const List<T>& other);
-	List<T>& operator=(List<T>&& other);
-
 	~List();
 
 private:
-	void copyFrom(const List<T>& other);
-	void moveFrom(List<T>&& other);
-
+	void copy(const List<T>& other);
 	void free();
 
 public:
-	void push_front(const T& el);	// O(1)
-	void push_back(const T& el);	// O(1)
+	void push_front(const T& elem);	// O(1)
+	void push_back(const T& elem);	// O(1)
 	void pop_front();				// O(1)
 	bool empty() const;				// O(1)
 };
 
 template <typename T>
-void List<T>::push_front(const T& el)
+List<T>::List() : head(nullptr), tail(nullptr) {}
+
+template <typename T>
+List<T>::List(const List<T>& other)
 {
-    head = new Node(el, head);
+	copy(other);
+}
+
+template <typename T>
+List<T>& List<T>::operator=(const List<T>& other)
+{
+	if (this != &other)
+	{
+		free();
+		copy(other);
+	}
+	return *this;
+}
+
+template <typename T>
+List<T>::~List()
+{
+	free();
+}
+
+template <typename T>
+void List<T>::push_front(const T& elem)
+{
+    head = new Node(elem, head);
     if (!tail)
     {
         tail = head;
@@ -49,9 +68,15 @@ void List<T>::push_front(const T& el)
 }
 
 template <typename T>
-void List<T>::push_back(const T& el)
+bool List<T>::empty() const
 {
-	Node* newNode = new Node(el);
+	return head == nullptr;
+}
+
+template <typename T>
+void List<T>::push_back(const T& elem)
+{
+	Node* newNode = new Node(elem);
 
 	if (!tail)
 	{
@@ -80,56 +105,7 @@ void List<T>::pop_front()
 }
 
 template <typename T>
-bool List<T>::empty() const
-{
-	return head == nullptr;
-}
-
-template <typename T>
-List<T>::List() : head(nullptr), tail(nullptr) {}
-
-template <typename T>
-List<T>::List(const List<T>& other)
-{
-	copyFrom(other);
-}
-
-template <typename T>
-List<T>::List(List<T>&& other)
-{
-	moveFrom(std::move(other));
-}
-
-template <typename T>
-List<T>& List<T>::operator=(const List<T>& other)
-{
-	if (this != &other)
-	{
-		free();
-		copyFrom(other);
-	}
-	return *this;
-}
-
-template <typename T>
-List<T>& List<T>::operator=(List<T>&& other)
-{
-	if (this != &other)
-	{
-		free();
-		moveFrom(std::move(other));
-	}
-	return *this;
-}
-
-template <typename T>
-List<T>::~List()
-{
-	free();
-}
-
-template <typename T>
-void List<T>::copyFrom(const List<T>& other)
+void List<T>::copy(const List<T>& other)
 {
 	Node* iter = other.head;
 
@@ -138,14 +114,6 @@ void List<T>::copyFrom(const List<T>& other)
 		push_back(iter->data);
 		iter = iter->next;
 	}
-}
-
-template <typename T>
-void List<T>::moveFrom(List<T>&& other)
-{
-	this->head = other.head;
-	this->tail = other.tail;
-	other.head = other.tail = nullptr;
 }
 
 template <typename T>

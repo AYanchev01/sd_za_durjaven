@@ -2,22 +2,24 @@ const int MAX_SIZE = 1024;
 
 template <typename T>
 class StaticQueue {
-	T elements[MAX_SIZE];
+private:
+	T data[MAX_SIZE];
 	unsigned head, tail, size;  // Индекси и текущ брой на елементите
 
 public:
-	StaticQueue();         // Създаване на празна опашка
+	StaticQueue();              // Създаване на празна опашка
 
 	bool full() const;
-	bool empty() const;    // Проверка дали опашка е празна
-	void push(T const& x); // Включване на елемент
-	void pop();            // Изключване на елемент
-	T head() const;       // Достъп до първия елемент в опашка
+	bool empty() const;         // Проверка дали опашка е празна
+	void push(const T& elem);   // Включване на елемент
+	void pop();                 // Изключване на елемент
+	T head() const;             // Достъп до първия елемент в опашка
 };
 
 // Задава индексите на първата празна позиция
 template <typename T>
-StaticQueue<T>::StaticQueue() : head(0), tail(0), size(0) {}
+StaticQueue<T>::StaticQueue() : head(0), tail(0), size(0)
+{}
 
 template <typename T>
 bool StaticQueue<T>::full() const {
@@ -34,16 +36,16 @@ T StaticQueue<T>::head() const {
 	if (empty()) {
 		throw std::runtime_error("Can not get elem from an empty queue");
 	}
-	return elements[head];
+	return data[head];
 }
 
 template <typename T>
-void StaticQueue<T>::push(T const& x) {
+void StaticQueue<T>::push(const T& elem) {
 	if (full()) {
 		throw std::runtime_error("The queue is full!");
 	}
 
-	elements[tail] = x;
+	data[tail] = elem;
 	size++;
 	tail++;
 	tail = tail % MAX_SIZE;

@@ -4,69 +4,69 @@
 template <typename T>
 class LinkedQueue
 {
-public:
-    LinkedQueue()
-        : head(nullptr)
-        , tail(nullptr)
-    {}
-    LinkedQueue(const LinkedQueue<T>& rhs);
+private:
+    struct Node
+    {
+        T data;
+        Node* next;
+        Node(const T& data, Node* next = nullptr)
+            : data(data), next(next) {}
+    } *head, *tail;
 
-    LinkedQueue<T>& operator=(const LinkedQueue<T>& rhs);
+    void copy(const LinkedQueue<T>& other);
+    void free();
+
+public:
+    LinkedQueue();
+    LinkedQueue(const LinkedQueue<T>& other);
+    LinkedQueue<T>& operator=(const LinkedQueue<T>& other);
     ~LinkedQueue();
 
     void enqueue(const T& data);
     T dequeue();
     const T& first() const;
-    bool isEmpty() const;
-    bool isFull() const { return false; }
-
-private:
-    struct node
-    {
-        T data;
-        node* next;
-        node(const T& data, node* n = nullptr)
-            : data(data), next(n) {}
-    } *head, *tail;
-
-    void clear();
-    void copy(const node* start);
+    bool empty() const;
+    bool full() const { return false; }
 };
 
 template <typename T>
-LinkedQueue<T>::LinkedQueue(const LinkedQueue& queue)
+LinkedQueue<T>::LinkedQueue() : head(nullptr), tail(nullptr)
+{}
+
+template <typename T>
+LinkedQueue<T>::LinkedQueue(const LinkedQueue<T>& other)
     : head(nullptr), tail(nullptr)
 {
     try {
-        copy(queue.head);
+        copy(other);
     }
-    catch (...) {
-        clear();
+    catch (std::bad_alloc&) {
+        free();
         throw;
     }
 }
 
 template <typename T>
-LinkedQueue<T>::~LinkedQueue()
+LinkedQueue<T>& LinkedQueue<T>::operator=(const LinkedQueue<T>& other)
 {
-    clear();
-}
-
-template <typename T>
-LinkedQueue<T>& LinkedQueue<T>::operator=(const LinkedQueue<T>& rhs)
-{
-    if (this != &rhs) {
-        clear();
-        copy(rhs.head);
+    if (this != &other) {
+        free();
+        copy(other);
     }
     return *this;
 }
 
 template <typename T>
+LinkedQueue<T>::~LinkedQueue()
+{
+    free();
+}
+
+template <typename T>
 void LinkedQueue<T>::enqueue(const T& elem)
 {
-    node* n = new node(elem);
-    if (isEmpty()) {
+    Node* n = new Node(elem);
+    if (empty()) {
         head = n;
     }
     else {
@@ -79,7 +79,7 @@ template <typename T>
 T LinkedQueue<T>::dequeue()
 {
     T res = first();
-    node* keep = head;
+    Node* keep = head;
     head = head->next;
     if (head == nullptr) {
         tail = nullptr;
@@ -91,31 +91,32 @@ T LinkedQueue<T>::dequeue()
 template <typename T>
 const T& LinkedQueue<T>::first() const
 {
-    if (!isEmpty())
+    if (!empty())
         return head->data;
     throw std::underflow_error("Empty queue");
 }
 
 template <typename T>
-bool LinkedQueue<T>::isEmpty() const
+bool LinkedQueue<T>::empty() const
 {
     return head == nullptr;
 }
 
 template <typename T>
-void LinkedQueue<T>::clear()
+void LinkedQueue<T>::copy(const LinkedQueue<T>& other)
 {
-    while (!isEmpty())
-        dequeue();
+    assert(empty());
+
+    Node* current = other.head;
+    while (current) {
+        enqueue(current->data);
+        current = current->next;
+    }
 }
 
 template <typename T>
-void LinkedQueue<T>::copy(const node* start)
+void LinkedQueue<T>::free()
 {
-    assert(head == nullptr && isEmpty());
-
-    while (start) {
-        enqueue(start->data);
-        start = start->next;
-    }
+    while (!empty())
+        dequeue();
 }

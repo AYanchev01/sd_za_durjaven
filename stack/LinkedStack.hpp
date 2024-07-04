@@ -4,65 +4,64 @@
 template <typename T>
 class LinkedStack
 {
-public:
-    LinkedStack();
-    LinkedStack(const LinkedStack<T>& stack);
-    ~LinkedStack();
-    LinkedStack<T>& operator=(const LinkedStack<T>& rhs);
-
-    void push(const T& elem);
-    T pop();
-    const T& top() const;
-    bool isEmpty() const;
-
 private:
     struct Node
     {
         T data;
         Node* next;
 
-        Node(const T& d, Node* n = nullptr)
-            : data(d)
-            , next(n)
+        Node(const T& data, Node* next = nullptr)
+            : data(data)
+            , next(next)
         {}
     } *tos;
 
-    void clear();
-    void copy(const Node* top);
+    void copy(const LinkedStack<T>& other);
+    void free();
+
+public:
+    LinkedStack();
+    LinkedStack(const LinkedStack<T>& other);
+    LinkedStack<T>& operator=(const LinkedStack<T>& other);
+    ~LinkedStack();
+
+    void push(const T& elem);
+    T pop();
+    const T& top() const;
+    bool empty() const;
 };
 
 template <typename T>
-LinkedStack<T>::LinkedStack()
-    : tos(nullptr)
+LinkedStack<T>::LinkedStack() : tos(nullptr)
 {}
 
 template <typename T>
-LinkedStack<T>::LinkedStack(const LinkedStack<T>& stack)
+LinkedStack<T>::LinkedStack(const LinkedStack<T>& other)
     : tos(nullptr)
 {
     try {
-        copy(stack.tos);
+        copy(other);
     }
     catch (std::bad_alloc&) {
-        clear();
+        free();
         throw;
     }
 }
 
 template <typename T>
-LinkedStack<T>::~LinkedStack()
+LinkedStack<T>& LinkedStack<T>::operator=(const LinkedStack<T>& other)
 {
-    clear();
+    if (this != &other) {
+        free();
+        copy(other);
+    }
+    return *this;
 }
 
 template <typename T>
-LinkedStack<T>& LinkedStack<T>::operator=(const LinkedStack<T>& rhs)
+LinkedStack<T>::~LinkedStack()
 {
-    if (this != &rhs) {
-        clear();
-        copy(rhs.tos);
-    }
-    return *this;
+    free();
 }
 
 template <typename T>
@@ -84,37 +83,39 @@ T LinkedStack<T>::pop()
 template <typename T>
 const T& LinkedStack<T>::top() const
 {
-    if (!isEmpty())
-        return tos->data;
-    throw std::underflow_error("Empty stack");
+    if (empty()) {
+        throw std::underflow_error("Empty stack");
+    }
+
+    return tos->data;
 }
 
 template <typename T>
-bool LinkedStack<T>::isEmpty() const
+bool LinkedStack<T>::empty() const
 {
     return tos == nullptr;
 }
 
 template <typename T>
-void LinkedStack<T>::clear()
+void LinkedStack<T>::copy(const LinkedStack<T>& other)
 {
-    while (!isEmpty())
-        pop();
+    assert(tos == nullptr);
+    if (other.tos) {
+        tos = new Node(other.tos->data);
+        Node* currentOther = other.tos->next;
+        Node* currentThis = tos;
+
+        while (currentOther) {
+            currentThis->next = new Node(currentOther->data);
+            currentThis = currentThis->next;
+            currentOther = currentOther->next;
+        }
+    }
 }
 
 template <typename T>
-void LinkedStack<T>::copy(const Node* top)
+void LinkedStack<T>::free()
 {
-    assert(tos == nullptr);
-    if (top) {
-        tos = new Node(top->data);
-        top = top->next;
-
-        Node* prev = tos;
-        while (top) {
-            prev->next = new Node(top->data);
-            prev = prev->next;
-            top = top->next;
-        }
-    }
+    while (!empty())
+        pop();
 }

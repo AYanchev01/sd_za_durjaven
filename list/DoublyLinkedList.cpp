@@ -24,12 +24,12 @@ public:
     ~DLList();
 
 private:
-    void copyFrom(const DLList<T>& other);
+    void copy(const DLList<T>& other);
     void free();
 
 public:
-    void push_front(const T& el);
-    void push_back(const T& el);
+    void push_front(const T& elem);
+    void push_back(const T& elem);
 
     void pop_front();
     void pop_back();
@@ -43,7 +43,7 @@ DLList<T>::DLList() : head(nullptr), tail(nullptr) {}
 template <typename T>
 DLList<T>::DLList(const DLList<T>& other)
 {
-    copyFrom(other);
+    copy(other);
 }
 
 template <typename T>
@@ -52,7 +52,7 @@ DLList<T>& DLList<T>::operator=(const DLList<T>& other)
     if (this != &other)
     {
         free();
-        copyFrom(other);
+        copy(other);
     }
 
     return *this;
@@ -65,29 +65,9 @@ DLList<T>::~DLList()
 }
 
 template <typename T>
-void DLList<T>::copyFrom(const DLList<T>& other)
+void DLList<T>::push_front(const T& elem)
 {
-    Node* iter = other.head;
-    while (iter)
-    {
-        push_back(iter->data);
-        iter = iter->next;
-    }
-}
-
-template <typename T>
-void DLList<T>::free()
-{
-    while (!empty())
-    {
-        pop_front();
-    }
-}
-
-template <typename T>
-void DLList<T>::push_front(const T& el)
-{
-    Node* newNode = new Node(el, head, nullptr);
+    Node* newNode = new Node(elem, head, nullptr);
     if (!head)
     {
         head = tail = newNode;
@@ -98,9 +78,9 @@ void DLList<T>::push_front(const T& el)
 }
 
 template <typename T>
-void DLList<T>::push_back(const T& el)
+void DLList<T>::push_back(const T& elem)
 {
-    Node* newNode = new Node(el, nullptr, tail);
+    Node* newNode = new Node(elem, nullptr, tail);
     if (!tail)
     {
         head = tail = newNode;
@@ -152,4 +132,24 @@ template <typename T>
 bool DLList<T>::empty() const
 {
     return head == nullptr;
+}
+
+template <typename T>
+void DLList<T>::copy(const DLList<T>& other)
+{
+    Node* iter = other.head;
+    while (iter)
+    {
+        push_back(iter->data);
+        iter = iter->next;
+    }
+}
+
+template <typename T>
+void DLList<T>::free()
+{
+    while (!empty())
+    {
+        pop_front();
+    }
 }

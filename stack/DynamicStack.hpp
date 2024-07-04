@@ -1,95 +1,125 @@
-#include <stdexcept>
-#include <algorithm>
+#include <iostream>
+
+const unsigned INITIAL_CAPACITY = 16;
 
 template <typename T>
-class DynamicStack
-{
-public:
-    DynamicStack(size_t size = 16)
-        : data(new T[size])
-        , tos(0)
-        , capacity(size)
-    {}
-    DynamicStack(const DynamicStack<T>& rhs);
-
-    DynamicStack<T>& operator=(const DynamicStack<T>& rhs);
-    ~DynamicStack() { delete[] data; }
-
-    void push(const T& elem);
-    T pop();
-    const T& top() const;
-    bool isEmpty() const;
-
+class DynamicStack {
 private:
     T* data;
-    size_t tos;
-    size_t capacity;
+    int topIndex;                               // Индекс на последния елемент в стека
+    int capacity;                               // Капацитет на стека
 
-    void resize(size_t newCapacity);
+    bool full() const;                          // Проверка дали стек е пълен
+    void resize();                              // Разширяване на стек
+    void copy(const DynamicStack<T>& other);    // Копиране на стек
+    void free();                                // Изтриване на паметта
+
+public:
+    DynamicStack();
+    DynamicStack(const DynamicStack<T>& other);
+    DynamicStack& operator=(const DynamicStack<T>& other);
+    ~DynamicStack();
+
+    bool empty() const;
+    void push(const T& elem);
+    void pop();
+    T top() const;
 };
 
+// Голяма четворка
 template <typename T>
-DynamicStack<T>::DynamicStack(const DynamicStack<T>& rhs)
-    : data(new T[rhs.capacity])
-    , tos(rhs.tos)
-    , capacity(rhs.capacity)
-{
-    std::copy(rhs.data, rhs.data + rhs.tos, data);
+DynamicStack<T>::DynamicStack() : topIndex(-1), capacity(INITIAL_CAPACITY) {
+    data = new T[capacity];
 }
 
 template <typename T>
-DynamicStack<T>& DynamicStack<T>::operator=(const DynamicStack<T>& rhs)
-{
-    if (this != &rhs) {
-        T* newData = new T[rhs.capacity];
-        std::copy(rhs.data, rhs.data + rhs.tos, newData);
-        delete[] data;
-        data = newData;
-        tos = rhs.tos;
-        capacity = rhs.capacity;
+DynamicStack<T>::DynamicStack(const DynamicStack<T>& other) {
+    copy(other);
+}
+
+template <typename T>
+DynamicStack<T>& DynamicStack<T>::operator=(const DynamicStack<T>& other) {
+    if (this != &other) {
+        free();
+        copy(other);
     }
     return *this;
 }
 
 template <typename T>
-void DynamicStack<T>::push(const T& elem)
-{
-    if (tos == capacity) {
-        resize(2 * capacity);
+DynamicStack<T>::~DynamicStack() {
+    free();
+}
+
+// Проверка дали стекът е празен - O(1)
+template <typename T>
+bool DynamicStack<T>::empty() const {
+	return topIndex == -1;
+}
+
+// Изтриване на елемента на върха на стека - O(1)
+template <typename T>
+void DynamicStack<T>::pop() {
+    if (empty()) {
+        throw std::runtime_error("You can not delete the top element of an empty stack!");
     }
-    data[tos++] = elem;
+
+    topIndex--;
 }
 
+// Извличане на върха на стека - O(1)
 template <typename T>
-T DynamicStack<T>::pop()
-{
-    if (!isEmpty()) {
-        return data[--tos];
+T DynamicStack<T>::top() const {
+    if (empty()) {
+        throw std::runtime_error("You can not get the top element of an empty stack!");
     }
-    throw std::underflow_error("Empty stack");
+
+    return data[topIndex];
 }
 
+// Добавяне на елемент на върха на стека
+// O(1) или O(n)
 template <typename T>
-const T& DynamicStack<T>::top() const
-{
-    if (!isEmpty()) {
-        return data[tos - 1];
+void DynamicStack<T>::push(const T& elem) {
+    if (full()) {
+        resize();
     }
-    throw std::underflow_error("Empty stack");
+    data[++topIndex] = elem;
 }
 
+// Помощни методи
+// Проверка дали стекът е пълен - O(1)
 template <typename T>
-bool DynamicStack<T>::isEmpty() const
-{
-    return tos == 0;
+bool DynamicStack<T>::full() const {
+    return topIndex == capacity - 1;
 }
 
+// Чисто копиране на стек - O(n)
 template <typename T>
-void DynamicStack<T>::resize(size_t newCapacity)
-{
-    T* newData = new T[newCapacity];
-    std::copy(data, data + tos, newData);
+void DynamicStack<T>::copy(const DynamicStack<T>& other) {
+    topIndex = other.topIndex;
+    capacity = other.capacity;
+
+    data = new T[capacity];
+    for (unsigned i = 0; i < capacity; i++) {
+        data[i] = stackElements[i];
+    }
+}
+
+// Преоразмеряване - O(n)
+template <typename T>
+void DynamicStack<T>::resize() {
+    T* oldStackPtr = data;
+    data = new T[2 * capacity];
+    for (unsigned i = 0; i < capacity; i++) {
+        data[i] = oldStackPtr[i];
+    }
+    capacity *= 2;        // Удвояване на капацитета
+    delete[] oldStackPtr; // Изтриване на старата памет
+}
+
+// Изтриване на динамично заделената памет за елементите на стека - O(1)
+template <typename T>
+void DynamicStack<T>::free() {
     delete[] data;
-    data = newData;
-    capacity = newCapacity;
 }

@@ -5,17 +5,17 @@ const unsigned MAX_SIZE = 1024;
 template <typename T>
 class Stack {
 private:
-    T elements[MAX_SIZE];  // Вътрешно представяне
-    int topIndex;          // Индекс на върха на стека
+    T data[MAX_SIZE];         // Вътрешно представяне
+    int topIndex;             // Индекс на върха на стека
 
 public:
-    Stack();               // Създаване на празен стек
+    Stack();                  // Създаване на празен стек
 
-    bool full() const;     // Помощна функция за запълненост
-    bool empty() const;    // Проверка дали стек е празен
-    void push(T const& x); // Включване на елемент
-    void pop();            // Изключване на елемент
-    T top() const;         // Достъп до върха на стека
+    bool full() const;        // Помощна функция за запълненост
+    bool empty() const;       // Проверка дали стек е празен
+    void push(const T& elem); // Включване на елемент
+    void pop();               // Изключване на елемент
+    T top() const;            // Достъп до върха на стека
 };
 
 // Конструктор за създаване на празен стек
@@ -41,17 +41,17 @@ T Stack<T>::top() const {
         throw std::runtime_error("You can not get the top element of an empty stack!");
     }
 
-    return elements[topIndex];
+    return data[topIndex];
 }
 
 // Добавяне на елемент на върха стека - O(1)
 template <typename T>
-void Stack<T>::push(T const& x) {
+void Stack<T>::push(const T& elem) {
     if (full()) {
         throw std::runtime_error("Stack is full!");
     }
     
-    elements[++topIndex] = x;
+    data[++topIndex] = elem;
 }
 
 // Изтриване на елемента на върха на стека - O(1)
