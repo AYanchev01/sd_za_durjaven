@@ -1,93 +1,64 @@
-#include <stdexcept>
+#include <iostream>
+// This constant can be injected in the template as well (template <typename T, unsigned MAX_SIZE = 1024>)
+const unsigned MAX_SIZE = 1024;
 
 template <typename T>
-class StaticStack
-{
-public:
-    StaticStack(size_t size = 16)
-        : data(new T[size])
-        , tos(0)
-        , size(size)
-    {}
-    StaticStack(const StaticStack<T>& rhs);
-
-    StaticStack<T>& operator=(const StaticStack<T>& rhs);
-    ~StaticStack() { delete[] data; }
-
-    void push(const T& elem);
-    T pop();
-    const T& top() const;
-    bool isEmpty() const;
-    bool isFull() const;
-
+class Stack {
 private:
-    T* data;
-    size_t tos;
-    const size_t size;
+    T elements[MAX_SIZE];  // Вътрешно представяне
+    int topIndex;          // Индекс на върха на стека
+
+public:
+    Stack();               // Създаване на празен стек
+
+    bool full() const;     // Помощна функция за запълненост
+    bool empty() const;    // Проверка дали стек е празен
+    void push(T const& x); // Включване на елемент
+    void pop();            // Изключване на елемент
+    T top() const;         // Достъп до върха на стека
 };
 
+// Конструктор за създаване на празен стек
 template <typename T>
-StaticStack<T>::StaticStack(const StaticStack<T>& rhs)
-    : data(new T[rhs.size])
-    , tos(0)
-    , size(rhs.size)
-{
-    while (tos < rhs.tos)
-        push(rhs.data[tos]);
+Stack<T>::Stack() : topIndex(-1) {}
+
+// Проверка дали стекът е празен - O(1)
+template <typename T>
+bool Stack<T>::empty() const {
+	return topIndex == -1;
 }
 
+// Проверка дали стекът е пълен - O(1)
 template <typename T>
-StaticStack<T>& StaticStack<T>::operator=(const StaticStack<T>& rhs)
-{
-    if (this != &rhs) {
-        if (rhs.tos <= size) {
-            tos = 0;
-            while (tos < rhs.tos)
-                push(rhs.data[tos]);
-        }
-        else {
-            throw std::overflow_error("Not enough space");
-        }
+bool Stack<T>::full() const {
+	return topIndex == MAX_SIZE - 1;
+}
+
+// Извличане на върха на стека - O(1)
+template <typename T>
+T Stack<T>::top() const {
+    if (empty()) {
+        throw std::runtime_error("You can not get the top element of an empty stack!");
     }
-    return *this;
+
+    return elements[topIndex];
 }
 
+// Добавяне на елемент на върха стека - O(1)
 template <typename T>
-void StaticStack<T>::push(const T& elem)
-{
-    if (!isFull()) {
-        data[tos++] = elem;
-    } else {
-        throw std::overflow_error("Stack is full");
+void Stack<T>::push(T const& x) {
+    if (full()) {
+        throw std::runtime_error("Stack is full!");
     }
+    
+    elements[++topIndex] = x;
 }
 
+// Изтриване на елемента на върха на стека - O(1)
 template <typename T>
-T StaticStack<T>::pop()
-{
-    if (!isEmpty()) {
-        return data[--tos];
+void Stack<T>::pop() {
+    if (empty()) {
+        throw std::runtime_error("You can not delete the top element of an empty stack!");
     }
-    throw std::underflow_error("Empty stack");
-}
-
-template <typename T>
-const T& StaticStack<T>::top() const
-{
-    if (!isEmpty()) {
-        return data[tos - 1];
-    }
-    throw std::underflow_error("Empty stack");
-}
-
-template <typename T>
-bool StaticStack<T>::isEmpty() const
-{
-    return tos == 0;
-}
-
-template <typename T>
-bool StaticStack<T>::isFull() const
-{
-    return tos == size;
+    topIndex--;
 }

@@ -1,95 +1,60 @@
-#include <stdexcept>
+const int MAX_SIZE = 1024;
 
 template <typename T>
-class StaticQueue
-{
+class StaticQueue {
+	T elements[MAX_SIZE];
+	unsigned head, tail, size;  // Индекси и текущ брой на елементите
+
 public:
-    StaticQueue(size_t size = 16)
-        : data(new T[size+1])
-        , head(0)
-        , tail(0)
-        , size(size+1)
-    {}
-    StaticQueue(const StaticQueue<T>& rhs);
+	StaticQueue();         // Създаване на празна опашка
 
-    StaticQueue<T>& operator=(const StaticQueue<T>& rhs);
-    ~StaticQueue() { delete[] data; }
-
-    void enqueue(const T& data);
-    T dequeue();
-    const T& first() const;
-    bool isEmpty() const;
-    bool isFull() const;
-
-private:
-    T* data;
-    size_t head, tail;
-    const size_t size;
+	bool full() const;
+	bool empty() const;    // Проверка дали опашка е празна
+	void push(T const& x); // Включване на елемент
+	void pop();            // Изключване на елемент
+	T head() const;       // Достъп до първия елемент в опашка
 };
 
+// Задава индексите на първата празна позиция
 template <typename T>
-StaticQueue<T>::StaticQueue(const StaticQueue<T>& rhs)
-    : data(new T[rhs.size])
-    , head(0)
-    , tail(0)
-    , size(rhs.size)
-{
-    for (size_t pos = rhs.head; pos != rhs.tail; pos = (pos + 1) % size)
-        enqueue(rhs.data[pos]);
+StaticQueue<T>::StaticQueue() : head(0), tail(0), size(0) {}
+
+template <typename T>
+bool StaticQueue<T>::full() const {
+	return size == MAX_SIZE;
 }
 
 template <typename T>
-StaticQueue<T>& StaticQueue<T>::operator=(const StaticQueue<T>& rhs)
-{
-    if (this != &rhs) {
-        delete[] data;
-        data = new T[rhs.size];
-        head = tail = 0;
-        size = rhs.size;
-        for (size_t pos = rhs.head; pos != rhs.tail; pos = (pos + 1) % size)
-            enqueue(rhs.data[pos]);
-    }
-    return *this;
+bool StaticQueue<T>::empty() const {
+	return size == 0;
 }
 
 template <typename T>
-void StaticQueue<T>::enqueue(const T& elem)
-{
-    if (!isFull()) {
-        data[tail] = elem;
-        tail = (tail + 1) % size;
-    } else {
-        throw std::overflow_error("Queue is full");
-    }
+T StaticQueue<T>::head() const {
+	if (empty()) {
+		throw std::runtime_error("Can not get elem from an empty queue");
+	}
+	return elements[head];
 }
 
 template <typename T>
-T StaticQueue<T>::dequeue()
-{
-    if (!isEmpty()) {
-        const T& res = data[head];
-        head = (head + 1) % size;
-        return res;
-    }
-    throw std::underflow_error("Empty queue");
+void StaticQueue<T>::push(T const& x) {
+	if (full()) {
+		throw std::runtime_error("The queue is full!");
+	}
+
+	elements[tail] = x;
+	size++;
+	tail++;
+	tail = tail % MAX_SIZE;
 }
 
 template <typename T>
-const T& StaticQueue<T>::first() const
-{
-    if (!isEmpty())
-        return data[head];
-    throw std::underflow_error("Empty queue");
-}
-
-template <typename T>
-bool StaticQueue<T>::isEmpty() const
-{
-    return head == tail;
-}
-
-template <typename T>
-bool StaticQueue<T>::isFull() const
-{
-    return (tail + 1) % size == head;
+void StaticQueue<T>::pop() {
+	if (empty()) {
+		throw std::runtime_error("Can not delete element from an empty queue");
+	}
+	size--;
+	head++;
+	head = head % MAX_SIZE;
 }
