@@ -1,5 +1,4 @@
 #include <stdexcept>
-#include <cassert>
 
 template <typename T>
 class LinkedQueue
@@ -16,14 +15,8 @@ private:
 public:
     LinkedQueue() : head(nullptr), tail(nullptr) {}
 
-    LinkedQueue(const LinkedQueue<T>& other) : head(nullptr), tail(nullptr) {
-        try {
-            copy(other);
-        }
-        catch (std::bad_alloc&) {
-            free();
-            throw;
-        }
+    LinkedQueue(const LinkedQueue<T>& other){
+        copy(other);
     }
 
     LinkedQueue<T>& operator=(const LinkedQueue<T>& other) {
@@ -39,31 +32,33 @@ public:
     }
 
     void enqueue(const T& elem) {
-        Node* n = new Node(elem);
+        Node* newNode = new Node(elem);
         if (empty()) {
-            head = n;
+            head = tail = newNode;
+            return;
         }
-        else {
-            tail->next = n;
-        }
-        tail = n;
+        tail->next = newNode;
+        tail = newNode;
     }
 
-    T dequeue() {
-        T res = first();
-        Node* keep = head;
+    void dequeue() {
+		if (empty())
+            throw std::underflow_error("Empty queue");
+
+        Node* toDel = head;
         head = head->next;
+        delete toDel;
+
         if (head == nullptr) {
             tail = nullptr;
         }
-        delete keep;
-        return res;
     }
 
     const T& first() const {
-        if (!empty())
-            return head->data;
-        throw std::underflow_error("Empty queue");
+        if (empty())
+            throw std::underflow_error("Empty queue");
+
+        return head->data;
     }
 
     bool empty() const {
@@ -74,8 +69,6 @@ public:
 
 private:
     void copy(const LinkedQueue<T>& other) {
-        assert(empty());
-
         Node* current = other.head;
         while (current) {
             enqueue(current->data);

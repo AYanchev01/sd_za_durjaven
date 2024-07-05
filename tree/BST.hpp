@@ -20,9 +20,9 @@ private:
 public:
     BST() : root(nullptr) {};
 
-    BST(const BST& tree) : root(copy(tree.root)) {};
+    BST(const BST<T>& tree) : root(copy(tree.root)) {};
 
-    BST& operator=(const BST& tree)
+    BST<T>& operator=(const BST<T>& tree)
     {
         if (&tree != this) {
             free(root);
@@ -47,7 +47,7 @@ private:
         }
     }
 
-    Node* copy(Node* root)
+    Node* copy(const Node* root)
     {
         return root ?
             new Node(root->key, copy(root->left), copy(root->right)) : nullptr;

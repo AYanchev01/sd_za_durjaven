@@ -20,7 +20,7 @@ public:
         copy(other);
     }
 
-    DynamicQueue& operator=(const DynamicQueue<T>& other) {
+    DynamicQueue<T>& operator=(const DynamicQueue<T>& other) {
         if (this != &other) {
             free();
             copy(other);
@@ -37,7 +37,7 @@ public:
     }
 
     void enqueue(const T& elem) {
-        if (currSize == capacity) {
+        if (full()) {
             resize();
         }
         data[tailIndex] = elem;
@@ -45,17 +45,15 @@ public:
         ++currSize;
     }
 
-    T dequeue() {
+    void dequeue() {
         if (empty()) {
             throw std::runtime_error("You cannot dequeue from an empty queue!");
         }
-        T value = data[headIndex];
         headIndex = (headIndex + 1) % capacity;
         --currSize;
-        return value;
     }
 
-    T front() const {
+    const T& front() const {
         if (empty()) {
             throw std::runtime_error("You cannot get the front element of an empty queue!");
         }
@@ -63,6 +61,10 @@ public:
     }
 
 private:
+    bool full() const {
+        return currSize == capacity;
+    }
+
     void resize() {
         T* oldElements = data;
         data = new T[2 * capacity];

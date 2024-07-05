@@ -19,9 +19,9 @@ private:
 public:
     BinaryTree() : root(nullptr) {};
 
-    BinaryTree(const BinaryTree& tree) : root(copy(tree.root)) {};
+    BinaryTree(const BinaryTree<T>& tree) : root(copy(tree.root)) {};
 
-    BinaryTree& operator=(const BinaryTree& tree)
+    BinaryTree<T>& operator=(const BinaryTree<T>& tree)
     {
         if (&tree != this) {
             free(root);
@@ -46,9 +46,10 @@ private:
         }
     }
 
-    Node* copy(Node* root)
+    Node* copy(const Node* root)
     {
-        return root ? new Node(root->key, copy(root->left), copy(root->right)) : nullptr;
+        return root ?
+            new Node(root->key, copy(root->left), copy(root->right)) : nullptr;
     }
 
     void insert(Node*& root, const T& key)

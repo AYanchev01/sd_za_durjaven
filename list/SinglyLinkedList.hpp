@@ -44,7 +44,7 @@ public:
 	void push_back(const T& elem) { // O(1)
 		Node* newNode = new Node(elem);
 
-		if (!tail) {
+		if (empty()) {
 			head = tail = newNode;
 			return;
 		}
@@ -54,7 +54,7 @@ public:
 	}
 
 	void pop_front() { // O(1)
-		if (!head)
+		if (empty())
 			throw std::length_error("Empty list!");
 
 		Node* toDelete = head;

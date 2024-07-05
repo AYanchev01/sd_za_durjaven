@@ -17,26 +17,24 @@ public:
         return currSize == 0;
     }
 
-    void push(const T& elem) { // Enqueue an element
+    void enqueue(const T& elem) { // Enqueue an element
         if (full()) {
             throw std::runtime_error("The queue is full!");
         }
         data[tailIndex] = elem;
+        tailIndex = (tailIndex + 1) % MAX_SIZE;
         currSize++;
-        tailIndex++;
-        tailIndex = tailIndex % MAX_SIZE;
     }
 
-    void pop() { // Dequeue an element
+    void dequeue() { // Dequeue an element
         if (empty()) {
             throw std::runtime_error("Cannot delete element from an empty queue");
         }
         currSize--;
-        headIndex++;
-        headIndex = headIndex % MAX_SIZE;
+        headIndex = (headIndex + 1) % MAX_SIZE;
     }
 
-    T head() const { // Access the front element
+    const T& head() const { // Access the front element
         if (empty()) {
             throw std::runtime_error("Cannot get element from an empty queue");
         }

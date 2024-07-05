@@ -30,21 +30,21 @@ public:
         return data;
     }
 
-    std::vector<Tree<T>*> const& subtrees() const {
+    const std::vector<Tree<T>*>& subtrees() const {
         return children;
     }
 
-    unsigned depth() const {
-        unsigned maxDepth = 0;
+    size_t depth() const {
+        size_t maxDepth = 0;
         for (Tree<T>* subtree : subtrees()) {
             maxDepth = std::max(maxDepth, subtree->depth());
         }
         return 1 + maxDepth;
     }
 
-    unsigned breadth() const {
-        unsigned maxBreadth = 0;
-        unsigned nChildren = subtrees().size();
+    size_t breadth() const {
+        size_t maxBreadth = 0;
+        size_t nChildren = subtrees().size();
         for (Tree<T>* subtree : subtrees()) {
             maxBreadth = std::max(maxBreadth, subtree->breadth());
         }

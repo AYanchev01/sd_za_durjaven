@@ -33,7 +33,7 @@ public:
         topIndex--;
     }
 
-    T top() const { // Access the top element of the stack
+    const T& top() const { // Access the top element of the stack
         if (empty()) {
             throw std::runtime_error("You can not get the top element of an empty stack!");
         }

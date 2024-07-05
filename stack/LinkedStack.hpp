@@ -1,5 +1,4 @@
 #include <stdexcept>
-#include <cassert>
 
 template <typename T>
 class LinkedStack {
@@ -17,14 +16,8 @@ private:
 public:
     LinkedStack() : tos(nullptr) {}
 
-    LinkedStack(const LinkedStack<T>& other) : tos(nullptr) {
-        try {
-            copy(other);
-        }
-        catch (std::bad_alloc&) {
-            free();
-            throw;
-        }
+    LinkedStack(const LinkedStack<T>& other) {
+        copy(other);
     }
 
     LinkedStack<T>& operator=(const LinkedStack<T>& other) {
@@ -43,12 +36,10 @@ public:
         tos = new Node(elem, tos);
     }
 
-    T pop() {
-        T res = top();
-        Node* keep = tos;
+    void pop() {
+        Node* toDel = tos;
         tos = tos->next;
-        delete keep;
-        return res;
+        delete toDel;
     }
 
     const T& top() const {
@@ -64,17 +55,17 @@ public:
 
 private:
     void copy(const LinkedStack<T>& other) {
-        assert(tos == nullptr);
-        if (other.tos) {
-            tos = new Node(other.tos->data);
-            Node* currentOther = other.tos->next;
-            Node* currentThis = tos;
+        if (other.empty()) {
+            return;
+        }
+        tos = new Node(other.tos->data);
+        Node* currentOther = other.tos->next;
+        Node* currentThis = tos;
 
-            while (currentOther) {
-                currentThis->next = new Node(currentOther->data);
-                currentThis = currentThis->next;
-                currentOther = currentOther->next;
-            }
+        while (currentOther) {
+            currentThis->next = new Node(currentOther->data);
+            currentThis = currentThis->next;
+            currentOther = currentOther->next;
         }
     }
 
